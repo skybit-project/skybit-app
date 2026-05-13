@@ -1,0 +1,65 @@
+name: Release APP
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Prepare release archive
+        run: |
+          mkdir -p release
+          cp -r dist release/
+          cp Dockerfile release/
+          cp nginx.conf release/
+          cp package.json release/
+          cp package-lock.json release/
+          cp .dockerignore release/
+          tar -czf ${{ github.event.repository.name }}-${GITHUB_REF_NAME}.tar.gz -C release .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ github.ref_name }}
+          path: ${{ github.event.repository.name }}-${{ github.ref_name }}.tar.gz
+          retention-days: 14
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.event.repository.name }}-${{ github.ref_name }}
+          body: |
+            Automated release for ${{ github.repository }}
+            - Commit: ${{ github.sha }}
+            - Build: ${{ github.run_id }}
+          files: |
+            ${{ github.event.repository.name }}-${{ github.ref_name }}.tar.gz

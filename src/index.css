@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background-app: #f4f6f9;
+}
+
+body {
+  background-color: var(--color-background-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

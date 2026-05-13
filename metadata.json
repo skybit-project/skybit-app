@@ -1,0 +1,6 @@
+{
+  "name": "SkyBit Weather Station",
+  "description": "A minimal, mobile-first dashboard for monitoring weather metrics and controlling LED modules on an ESP32 or similar device.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,2 +1,0 @@
-# skybit-app
-skybit app
